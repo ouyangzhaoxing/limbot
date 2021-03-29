@@ -218,12 +218,15 @@ jsonfile.readFile("./config.json", function (err, config) {
   /** 执剑者指令 */
   function swordbearerInstruct(data) {
 
-    let checkFlag = true;
+    let checkFlag = true, msg = data.message;
 
-    if (data.message[data.message.length - 1].type === "text" && isOwnerOrAdmin(data)
-      && data.message[data.message.length - 1].data.text.indexOf(config.bot_name) !== -1) {
+    if (!(msg.length >= 2)) return;
 
-      if (data.message[data.message.length - 1].data.text.indexOf("击杀") !== -1) swordbearerKill(data);
+    if (isOwnerOrAdmin(data) && msg[msg.length - 1].type === "text" &&
+      msg[msg.length - 1].data.text.indexOf(config.bot_name) !== -1 &&
+      msg[msg.length - 2].type === "at") {
+
+      if (msg[msg.length - 1].data.text.indexOf("击杀") !== -1) swordbearerKill(data);
       else checkFlag = false;
 
     } else checkFlag = false;
@@ -234,13 +237,24 @@ jsonfile.readFile("./config.json", function (err, config) {
 
   function swordbearerKill(data) {
 
-    try { // TODO 处理异常情况
+    if (data.message[0].type === "reply") {
 
-      bot.deleteMsg(data.message[0].data.id);
-      bot.setGroupKick(data.group_id, data.message[data.message.length - 2].data.qq, true);
-      bot.sendGroupMsg(data.group_id, config.tipsTemplate.answer_swordbearer);
+      bot.getMsg(data.message[0].data.id).then(function (msg) {
 
-    } catch (error) { }
+        let cmd = "INSERT INTO VIOLATION_RECORDS VALUES ($USER_ID, $GROUP_ID, $TYPE, $REMARK, $TIME);";
+        violationData.run(cmd, {
+          $USER_ID: msg.data.user_id, $GROUP_ID: msg.data.group_id,
+          $TYPE: "击杀", $REMARK: msg.data.raw_message, $TIME: (new Date()).toLocaleString()
+        });
+
+        bot.deleteMsg(msg.data.message_id);
+
+      });
+
+    }
+
+    bot.setGroupKick(data.group_id, data.message[data.message.length - 2].data.qq, true);
+    bot.sendGroupMsg(data.group_id, config.tipsTemplate.answer_swordbearer);
 
   }
 
