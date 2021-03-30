@@ -38,7 +38,7 @@ jsonfile.readFile("./config.json", function (err, config) {
 
     if (longCodeWithdraw(data)) return;
 
-    try { answer(data); } catch (error) { } // TODO 异常处理
+    answer(data);
 
     if (data.sender.level >= config.msg_no_check_level) return; // 忽略检查等级较高的成员
 
@@ -175,11 +175,14 @@ jsonfile.readFile("./config.json", function (err, config) {
   /** 自动应答 */
   function answer(data) {
 
-    if (!(data.message[data.message.length - 2].type === "at" &&
-      data.message[data.message.length - 2].data.qq == config.bot_id)) return;
+    let msg = data.message;
 
-    if (data.message[data.message.length - 1].type !== "text") return;
-    let cmd = data.message[data.message.length - 1].data.text.split(" ").filter(c => c != "");
+    if (!(msg.length >= 2)) return;
+
+    if (!(msg[msg.length - 2].type === "at" && msg[msg.length - 2].data.qq == config.bot_id)) return;
+    if (msg[msg.length - 1].type !== "text") return;
+
+    let cmd = msg[msg.length - 1].data.text.split(" ").filter(c => c != "");
 
     switch (cmd[0]) {
       case "清理群员":
