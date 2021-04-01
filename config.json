@@ -3,6 +3,7 @@
     "bot_id": "",
     "password": "",
     "listen": [],
+    "cache_msg_max": 50,
     "msg_no_check_level": 6,
     "no_kick_level": 3,
     "auto_talk_interval": 600000,

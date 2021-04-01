@@ -29,9 +29,16 @@ jsonfile.readFile("./config.json", function (err, config) {
 
   });
 
+  var messageHistories = [];
+
   bot.on("message.group", (data) => { // 监听群组消息
 
     if (!checkListen(data.group_id)) return;
+
+    messageHistories.push(data); // 缓存历史消息
+
+    if (messageHistories.length > config.cache_msg_max)
+      messageHistories.shift();
 
     if (swordbearerInstruct(data)) return;
 
@@ -257,11 +264,14 @@ jsonfile.readFile("./config.json", function (err, config) {
           $TYPE: "击杀", $REMARK: msg.data.raw_message, $TIME: (new Date()).toLocaleString()
         });
 
-        bot.deleteMsg(msg.data.message_id);
-
       });
 
     }
+
+    messageHistories.forEach(hmsg => {
+      if (hmsg.user_id == data.message[data.message.length - 2].data.qq)
+        bot.deleteMsg(hmsg.message_id);
+    });
 
     bot.setGroupKick(data.group_id, data.message[data.message.length - 2].data.qq, true);
     bot.sendGroupMsg(data.group_id, config.tipsTemplate.answer_swordbearer);
