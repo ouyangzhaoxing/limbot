@@ -52,7 +52,8 @@ jsonfile.readFile("./config.json", function (err, config) {
 
     if (data.sender.level >= config.msg_no_check_level) return; // 忽略检查等级较高的成员
 
-    linkWithdraw(data);
+    if (linkWithdraw(data)) return;
+
     checkMessage(data);
 
   });
@@ -331,10 +332,15 @@ jsonfile.readFile("./config.json", function (err, config) {
 
   }
 
-  /** 链接撤回 */
+  /** 链接撤回（实验性） */
   function linkWithdraw(data) {
 
-    if (!config.function.link_withdraw && !linkify.pretest(data.raw_message)) return;
+    if (!config.function.link_withdraw) return false;
+
+    if (data.raw_message.indexOf("@") !== -1 ||
+      data.raw_message.indexOf(".net") !== -1) return false; // TODO fix
+
+    if (!linkify.pretest(data.raw_message)) return false;
 
     let cmd = "SELECT * FROM LINK_WHITELIST WHERE INSTR($MSG, VALUE) > 0 LIMIT 1;";
 
@@ -347,6 +353,8 @@ jsonfile.readFile("./config.json", function (err, config) {
       bot.sendGroupMsg(data.group_id, config.tipsTemplate.link_withdraw);
 
     });
+
+    return true;
 
   }
 
