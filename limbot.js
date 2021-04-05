@@ -187,7 +187,7 @@ function checkMessage(data) {
 
     }
 
-    bot.deleteMsg(data.message_id);
+    setTimeout(() => { bot.deleteMsg(data.message_id); }, 800);
 
     tips = tips.replace("[nickname]", "[CQ:at,qq=" + data.user_id + "]");
     if (config.function.banned_message_tips) bot.sendGroupMsg(data.group_id, tips);

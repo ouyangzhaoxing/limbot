@@ -3,7 +3,7 @@
     "bot_id": "",
     "password": "",
     "listen": [],
-    "cache_msg_max": 60,
+    "cache_msg_max": 100,
     "msg_no_check_length": 15,
     "msg_no_check_level": 6,
     "no_kick_level": 3,
